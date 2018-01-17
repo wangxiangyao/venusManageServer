@@ -123,12 +123,6 @@ let schemaInput = `
     fulldress: threeSchemaInput
     guesslike: guesslikeInput
   }
-  type Mutation {
-    setHomepage(input: HomepageInput): Homepage
-    updateHomepage(input: HomepageInput): Homepage
-    addAuthor(input: authorInput): author
-    setAuthorList(input: [authorInput]): [author]
-  }
 `
 let schemaQuery = `
   type imgItem {
@@ -239,18 +233,9 @@ let schemaQuery = `
     fulldress: threeSchema
     guesslike: guesslike
   }
-  type Query {
-    getHomepage: Homepage
-    getAuthorList: [author]
-  },
 `
 
-let schema = `
-  schema {
-    query: Query
-    mutation: Mutation
-  }
-` + schemaQuery + schemaInput
+let schema = schemaQuery + schemaInput
 
 // 1.上级对象 2.提交的参数 3.ctx
 let resolver = {
@@ -258,6 +243,7 @@ let resolver = {
     async getHomepage (obj, params) {
       const homepage = await api.getFile('home/json/main.json')
       var data = JSON.parse(homepage.content.toString('utf8'))
+      console.log('首页', data)
       return data
     },
     async getAuthorList (obje, params) {

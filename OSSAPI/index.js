@@ -13,7 +13,7 @@ export default {
   // TODO: 1.上传文件 2.上传图片 3.删除图片 4.更新文件 5.获取文件
   getFile (path) {
     return co(function*() {
-      return yield store.get(path);
+      return yield store.get(path)
     })
     .catch((err) => {
       console.log(err)
@@ -22,6 +22,11 @@ export default {
   upload (path, data) {
     return co(function* () {
       return yield store.put(path, data)
+    })
+  },
+  deleteFile (path) {
+    return co(function* () {
+      return yield store.delete(path)
     })
   }
 }

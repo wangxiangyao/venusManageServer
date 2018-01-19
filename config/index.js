@@ -4,7 +4,7 @@ let configs = {
     credentials: true,
     origin: '*'
   },
-  port: 5555,
+  port: 3000,
   mongodb: {
     dbname: 'test',
     ip: 'localhost:27017'

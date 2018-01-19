@@ -1,10 +1,12 @@
 import { makeExecutableSchema } from 'graphql-tools'
 import Homepage from './Homepage/index.js'
 import article from './article/index.js'
+import author from './author/index.js'
 
 const schema = {
   Homepage,
-  article
+  article,
+  author
 }
 let typeDefs = `
   schema {
@@ -25,6 +27,7 @@ let typeDefs = `
     saveArticle(input: articleInput): article
     addArticle: article
     deleteArticle(id: String): article
+    deleteAuthor(id: String): author
   }
 `
 let resolvers = {}

@@ -18,16 +18,6 @@ let schemaInput = `
   input imgItemInput {
     url: String
   }
-  input tagInput {
-    text: String
-  }
-  input authorInput {
-    id: String
-    avator: String
-    name: String
-    desc: String
-    tag: [tagInput]
-  }
 
   input swiperInput {
     item: [swiperItemInput]
@@ -128,16 +118,7 @@ let schemaQuery = `
   type imgItem {
     url: String
   }
-  type tag {
-    text:  String
-  }
-  type author {
-    id: ID
-    avator: String
-    name: String
-    desc: String
-    tag: [tag]
-  }
+
 
   type swiper {
     item: [swiperItem]
@@ -245,12 +226,6 @@ let resolver = {
       var data = JSON.parse(homepage.content.toString('utf8'))
       console.log('首页', data)
       return data
-    },
-    async getAuthorList (obje, params) {
-      const authorList = await api.getFile('home/json/authorList.json')
-      var data = JSON.parse(authorList.content.toString('utf8'))
-      console.log(data)
-      return data
     }
   },
   Mutation: {
@@ -271,28 +246,9 @@ let resolver = {
         _id: id
       })
       return homepage
-    },
-    async addAuthor (obj, { input }) {
-      console.log('前端输入的author', input)
-      const authorList = await api.getFile('home/json/authorList.json')
-      var data = JSON.parse(authorList.content.toString('utf8'))
-      input.id = Number(data[data.length - 1].id) + 1
-      data.push(input)
-      const result = await api.upload('home/json/authorList.json', Buffer.from(JSON.stringify(data)))
-      if (result.res.status === 200) {
-        return input
-      }
-    },
-    async setAuthorList (obj, { input }) {
-      console.log('前端输入的authorList', input)
-      const result = await api.upload('home/json/authorList.json', Buffer.from(JSON.stringify(input)))
-      if (result.res.status === 200) {
-        return input
-      }
     }
   }
 }
-
 
 export default {
   schema,

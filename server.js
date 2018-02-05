@@ -43,7 +43,7 @@ router.post('/api/deleteImg', koaBody(), async (ctx, next) => {
   const imgName = ctx.request.body.name
   const result = await api.deleteFile(`/home/image/${imgName}`)
   console.log(result)
-  if (result.status == 204) {
+  if (result.res.status == 204) {
     ctx.body = {
       code: 200,
       message: '删除成功'

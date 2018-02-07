@@ -13,6 +13,8 @@ let schemaInput = `
     url: String
     content: String
     author: authorInput
+    updateAt: String
+    createAt: String
   }
 `
 let schemaQuery = `
@@ -24,11 +26,15 @@ let schemaQuery = `
     url: String
     content: String
     author: author
+    updateAt: String
+    createAt: String
   }
   type articleSummary {
     id: ID
     title: String
     url: String
+    updateAt: String
+    createAt: String
     author: author
   }
 `
@@ -54,15 +60,17 @@ let resolver = {
   Mutation: {
     async saveArticle (obj, { input }) {
       console.log('前端输入的ariticle', input)
-      const { id, title, url, author} = input
+      const { id, title, url, author, updateAt } = input
       const articleList = await api.getFile('home/json/articleList.json')
       var articleListData = JSON.parse(articleList.content.toString('utf8'))
       // 在文章list中，根据id找到需要更新的项，然后更新
       for (let key in articleListData) {
         if (articleListData[key].id === id) {
-          articleListData[key].title = title
-          articleListData[key].url = url
-          articleListData[key].author = author
+          let theArticle = articleListData[key]
+          theArticle.title = title
+          theArticle.url = url
+          theArticle.author = author
+          theArticle.updateAt = +new Date() + ''
           break
         }
       }
@@ -72,10 +80,16 @@ let resolver = {
       console.log(result1, result2)
       if (result1.res.status === 200 && result2.res.status === 200) {
         return input
+      } else {
+        return {
+          code: 'error',
+          message: '没有做判断'
+        }
       }
     },
     async addArticle (obj) {
       console.log('新增文章\n')
+      let time = +new Date() + ''
       let emptyArticle = {
         id: '',
         title: '',
@@ -83,6 +97,8 @@ let resolver = {
         shareTitle: '',
         url: '',
         content: '',
+        updateAt: time,
+        createAt: time,
         author: {} // TODO: 抽象出空数据模型，在需要的地方引入
       }
       const articleList = await api.getFile('home/json/articleList.json')
@@ -102,6 +118,8 @@ let resolver = {
           title: emptyArticle.title,
           url: emptyArticle.url,
           author: emptyArticle.author,
+          updateAt: emptyArticle.updateAt,
+          createAt: emptyArticle.createAt
         })
         const result1 = await api.upload('home/json/articleList.json', Buffer.from(JSON.stringify(articleListData)))
         if (result1.res.status === 200) {

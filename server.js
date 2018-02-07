@@ -39,10 +39,8 @@ router.post('/api/uploadImg', uploadImg.single('file'), async (ctx, next) => {
   }
 })
 router.post('/api/deleteImg', koaBody(), async (ctx, next) => {
-  console.log(ctx.request.body)
   const imgName = ctx.request.body.name
   const result = await api.deleteFile(`/home/image/${imgName}`)
-  console.log(result)
   if (result.res.status == 204) {
     ctx.body = {
       code: 200,

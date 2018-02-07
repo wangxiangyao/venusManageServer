@@ -37,13 +37,11 @@ let resolver = {
     async getAuthorList (obje, params) {
       const authorList = await api.getFile('home/json/authorList.json')
       var data = JSON.parse(authorList.content.toString('utf8'))
-      console.log(data)
       return data
     }
   },
   Mutation: {
     async addAuthor (obj, { input }) {
-      console.log('前端输入的author', input)
       const authorList = await api.getFile('home/json/authorList.json')
       var data = JSON.parse(authorList.content.toString('utf8'))
       input.id = parseInt(+new Date() + ( Math.random() * 10000 )) + ''
@@ -54,14 +52,12 @@ let resolver = {
       }
     },
     async setAuthorList (obj, { input }) {
-      console.log('前端输入的authorList', input)
       const result = await api.upload('home/json/authorList.json', Buffer.from(JSON.stringify(input)))
       if (result.res.status === 200) {
         return input
       }
     },
     async deleteAuthor (obj, { id }) {
-      console.log('要删除的author', id)
       const authorList = await api.getFile('home/json/authorList.json')
       var data = JSON.parse(authorList.content.toString('utf8'))
       var hadDelete = {}
@@ -72,7 +68,6 @@ let resolver = {
         }
         return true
       })
-      console.log('删除后的作者列表', data)
       const result = await api.upload('home/json/authorList.json', Buffer.from(JSON.stringify(data)))
       if (result.res.status === 200) {
         return hadDelete

@@ -47,19 +47,16 @@ let resolver = {
     async getArticleList (obj, params) {
       const articleList = await api.getFile('home/json/articleList.json')
       var data = JSON.parse(articleList.content.toString('utf8'))
-      console.log('get文章列表', data)
       return data
     },
     async getArticle (obje, { id }) {
       const article = await api.getFile(`home/article/${id}.json`)
       var data = JSON.parse(article.content.toString('utf8'))
-      console.log('获取文章', data)
       return data
     }
   },
   Mutation: {
     async saveArticle (obj, { input }) {
-      console.log('前端输入的ariticle', input)
       const { id, title, url, author, updateAt } = input
       const articleList = await api.getFile('home/json/articleList.json')
       var articleListData = JSON.parse(articleList.content.toString('utf8'))
@@ -77,7 +74,6 @@ let resolver = {
 
       const result1 = await api.upload('home/json/articleList.json', Buffer.from(JSON.stringify(articleListData)))
       const result2 = await api.upload(`home/article/${id}.json`, Buffer.from(JSON.stringify(input)))
-      console.log(result1, result2)
       if (result1.res.status === 200 && result2.res.status === 200) {
         return input
       } else {
@@ -88,7 +84,6 @@ let resolver = {
       }
     },
     async addArticle (obj) {
-      console.log('新增文章\n')
       let time = +new Date() + ''
       let emptyArticle = {
         id: '',
@@ -106,7 +101,6 @@ let resolver = {
 
       emptyArticle.id = parseInt(+new Date() + ( Math.random() * 10000 )) + ''
       emptyArticle.url = `http://venus-resource.oss-cn-shanghai.aliyuncs.com/${articleHomeUrl}/${emptyArticle.id}.json`
-      console.log(emptyArticle.id)
       const result = await api.upload(`home/article/${emptyArticle.id}.json`, Buffer.from(JSON.stringify(emptyArticle)))
 
       // input.id = Number(data[data.length - 1].id) + 1
@@ -128,7 +122,6 @@ let resolver = {
       }
     },
     async deleteArticle (obj, { id }) {
-      console.log('删除文章：', id)
       const deleteArticle = await api.getFile(`home/article/${id}.json`)
       const articleList = await api.getFile('home/json/articleList.json')
 
@@ -137,7 +130,6 @@ let resolver = {
 
       const result = await api.deleteFile(`${articleHomeUrl}/${id}.json`)
       var data = result.res.data.toString('utf8')
-      console.log(result, data)
       if (result.res.status === 200 || result.res.status === 204) {
         // 如果删除成功，在列表中删除
         let deleteIndex
@@ -147,7 +139,6 @@ let resolver = {
             break
           }
         }
-        console.log(deleteIndex)
         articleListData.splice(deleteIndex, 1)
         const result2 = await api.upload('home/json/articleList.json', Buffer.from(JSON.stringify(articleListData)))
         if (result2.res.status === 200) {

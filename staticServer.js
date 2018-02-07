@@ -12,13 +12,22 @@ function staticFiles(url, dir) {
 		//判断是否为静态接口
 		if (reqPath.startsWith(url)) {
 			let fp = path.join(dir, reqPath.substring(url.length));
-			console.log(`请求静态资源 ${url}`)
-				// 拼接一下，得到完整的路径
+			// 同步获取文件状态
+			let fileStats = fs.statSync(fp);
 			ctx.response.type = mime.getType(reqPath);
 			try {
-				ctx.response.body = await fs.readFile(fp);
+				// 利用last-modify判断是否缓存
+				if (Date(ctx.request.header['if-modified-since']) === Date(fileStats.mtime)) {
+					ctx.status = 304
+					return
+				}
+				ctx.lastModified = fileStats.mtime
+
+				// chrome 必须设置Cache-Control字段，才能自动返回if-modified-since字段。
+				// 否则，即使设置了last-modified也不会返回
+				ctx.set('Cache-Control', 'max-age=0')
+				ctx.body = await fs.readFile(fp);
 			} catch (e) {
-				console.log(e);
 				ctx.response.status = 404;
 				// 返回404页面，后边再添加
 			}

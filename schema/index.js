@@ -36,7 +36,6 @@ for (let [key, val] of Object.entries(schema)) {
   typeDefs += val.schema
   resolvers.Query = Object.assign({}, resolvers.Query, val.resolver.Query)
   resolvers.Mutation = Object.assign({}, resolvers.Mutation, val.resolver.Mutation)
-  console.log(resolvers)
 }
 const executableSchema  = makeExecutableSchema({
   typeDefs,

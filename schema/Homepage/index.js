@@ -224,13 +224,11 @@ let resolver = {
     async getHomepage (obj, params) {
       const homepage = await api.getFile('home/json/main.json')
       var data = JSON.parse(homepage.content.toString('utf8'))
-      console.log('首页', data)
       return data
     }
   },
   Mutation: {
     async setHomepage (obj, { input }) {
-      console.log('前端输入的homepage', input)
       const result = await api.upload('home/json/main.json', Buffer.from(JSON.stringify(input)))
       console.log(result)
       if (result.res.status === 200) {

@@ -17,7 +17,7 @@ function staticFiles(url, dir) {
 			ctx.response.type = mime.getType(reqPath);
 			try {
 				// 利用last-modify判断是否缓存
-				if (Date(ctx.request.header['if-modified-since']) === Date(fileStats.mtime)) {
+				if (ctx.request.header['if-modified-since'] && Date(ctx.request.header['if-modified-since']) === Date(fileStats.mtime)) {
 					ctx.status = 304
 					return
 				}

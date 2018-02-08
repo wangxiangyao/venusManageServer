@@ -1,10 +1,12 @@
 import fs from 'fs'
 import path from 'path'
+import https from 'https'
 import koa from 'koa'
 import koaRouter from 'koa-router'
 import koaBody from 'koa-bodyparser'
 import { graphqlKoa, graphiqlKoa } from 'apollo-server-koa'
 import cors from 'koa2-cors'
+import jsSHA from 'jssha'
 import configs from './config/index.js'
 import schema from './schema'
 import api from './OSSAPI/index.js'
@@ -31,6 +33,8 @@ router.post('/graphql', koaBody(), graphqlKoa({
 }));
 router.get('/graphql', graphqlKoa({ schema: schema }));
 router.get('/graphiql', graphiqlKoa({ endpointURL: '/graphql' }));
+
+// 除了graphql以外的请求
 router.post('/api/uploadImg', uploadImg.single('file'), async (ctx, next) => {
   const fileInfo = await api.upload(`/home/image/${ctx.req.file.originalname}`, ctx.req.file.buffer)
   ctx.body = {
@@ -51,6 +55,122 @@ router.post('/api/deleteImg', koaBody(), async (ctx, next) => {
 router.get('/', async (ctx, next) => {
   var indexPath = path.join(_staticDir, '/index.html');
   ctx.response.body = fs.readFileSync(indexPath, 'utf-8');
+})
+
+router.get('/wxConfig', async (ctx, next) => {
+  // 一个参数：url
+  /* 返回值：
+  {
+    appId: '',
+    timestamp: ,
+    nonceStr: '',
+    signature: ''
+  }
+  */
+  var resultOfAccessToken, resultOfJsapiTicket, result = {}, calcSignature1
+  var nonceStr1 = nonceStr(),
+    timeStamp1 = timeStamp(),
+    appid = 'wx5e7fc035524cd8e6',
+    secret = '577b5cc4f5aae9b14c9dec7ce77efddf'
+
+  function nonceStr () {
+    return Math.random().toString(36).substr(2, 15);
+  }
+  function timeStamp () {
+    return parseInt(new Date().getTime() / 1000) + '';
+  }
+  function calcSignature (ticket, nonceStr, timeStamp, url) {
+      var result = {
+          jsapi_ticket: ticket,
+          nonceStr: nonceStr,
+          timestamp: timeStamp,
+          url: url,
+      }
+      var str = 'jsapi_ticket=' + ticket + '&noncestr=' + nonceStr + '&timestamp=' + timeStamp + '&url=' + url;
+      // 对str使用sha1签名，得到signature，这里使用jsSHA模块，需install
+      shaObj = new jsSHA(str, 'TEXT');
+      return shaObj.getHash('SHA-1', 'HEX');
+  }
+  resultOfAccessToken = await new Promise((resolve, reject) => {
+    https.get(`https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appid}&secret=${secret}`, (res) => {
+      const { statusCode }  = res
+      let error;
+      if (statusCode !== 200) {
+        error = new Error('请求失败。\n' +
+                          `状态码: ${statusCode}`);
+      }
+      if (error) {
+        console.error(error.message);
+        // 消耗响应数据以释放内存
+        res.resume();
+        reject({
+          code: statusCode,
+          message: error.message
+        })
+      }
+
+      res.setEncoding('utf8');
+      let rawData = '';
+      res.on('data', (chunk) => { rawData += chunk; });
+      res.on('end', () => {
+        try {
+          const parsedData = JSON.parse(rawData);
+          console.log('请求内容：', parsedData);
+          resolve(parsedData)
+        } catch (e) {
+          reject(e.message);
+        }
+      })
+    })
+  })
+  if (resultOfAccessToken.access_token) {
+    resultOfJsapiTicket = await new Promise((resolve, reject) => {
+      https.get(`https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=${resultOfAccessToken.access_token}&type=jsapi`, (res) => {
+        const { statusCode }  = res
+        let error;
+        if (statusCode !== 200) {
+          error = new Error('请求失败。\n' +
+                            `状态码: ${statusCode}`);
+        }
+        if (error) {
+          console.error(error.message);
+          // 消耗响应数据以释放内存
+          res.resume();
+          reject({
+            code: statusCode,
+            message: error.message
+          })
+        }
+
+        res.setEncoding('utf8');
+        let rawData = '';
+        res.on('data', (chunk) => { rawData += chunk; });
+        res.on('end', () => {
+          try {
+            const parsedData = JSON.parse(rawData);
+            console.log('请求内容：', parsedData);
+            resolve(parsedData)
+          } catch (e) {
+            reject(e.message);
+          }
+        })
+      })
+    })
+    if (resultOfJsapiTicket.ticket) {
+      calcSignature1 = calcSignature(resultOfJsapiTicket.ticket, nonceStr1, timeStamp1, ctx.query.url)
+      result = {
+        appId: appid,
+        timestamp: timeStamp1,
+        nonceStr: nonceStr1,
+        signature: calcSignature1,
+      }
+    } else {
+      result = resultOfJsapiTicket
+    }
+  } else {
+    result = resultOfAccessToken
+  }
+  ctx.body = result
 })
 
 // 配置cors请求头

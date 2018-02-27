@@ -132,6 +132,7 @@ let resolver = {
       var data = result.res.data.toString('utf8')
       if (result.res.status === 200 || result.res.status === 204) {
         // 如果删除成功，在列表中删除
+        console.log('删除列表中的文章', id)
         let deleteIndex
         for (let key in articleListData) {
           if (articleListData[key].id === id) {

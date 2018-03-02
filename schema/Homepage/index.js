@@ -229,9 +229,16 @@ let resolver = {
   },
   Mutation: {
     async setHomepage (obj, { input }) {
+      var guesslikeData = input.guesslike
+      // 商城首页和小程序的猜你喜欢同步
+      const miniHomepageBuffer = await api.getFile('home/json/miniMain.json')
+      var miniHomepageData = JSON.parse(miniHomepageBuffer.content.toString('utf8'))
+      miniHomepageData.guesslike = guesslikeData
+
       const result = await api.upload('home/json/main.json', Buffer.from(JSON.stringify(input)))
-      console.log(result)
-      if (result.res.status === 200) {
+      const resultUpdataMiniHomepage = await api.upload('home/json/miniMain.json', Buffer.from(JSON.stringify(miniHomepageData)))
+      console.log(result, resultUpdataMiniHomepage)
+      if (result.res.status === 200 && resultUpdataMiniHomepage.res.status === 200) {
         return input
       }
     },

@@ -2,11 +2,13 @@ import { makeExecutableSchema } from 'graphql-tools'
 import Homepage from './Homepage/index.js'
 import article from './article/index.js'
 import author from './author/index.js'
+import miniHomepage from './miniHome/index.js'
 
 const schema = {
   Homepage,
   article,
-  author
+  author,
+  miniHomepage
 }
 let typeDefs = `
   schema {
@@ -15,11 +17,13 @@ let typeDefs = `
   }
   type Query {
     getHomepage: Homepage
+    getMiniHomepage: miniHomepage
     getAuthorList: [author]
     getArticleList: [articleSummary]
     getArticle(id: String): article
   }
   type Mutation {
+    setMiniHomepage(input: miniHomepageInput): miniHomepage
     setHomepage(input: HomepageInput): Homepage
     updateHomepage(input: HomepageInput): Homepage
     addAuthor(input: authorInput): author

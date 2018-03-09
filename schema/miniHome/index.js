@@ -3,17 +3,6 @@
 // import dbModel from '../../dbModel/index.js'
 import api from '../../OSSAPI/index.js'
 
-// 模拟数据
-class Homepage {
-  constructor(id, { title, guesslike }) {
-    this.id = id
-    this.title = title
-    this.guesslike = guesslike
-  }
-}
-
-let mockDB = {}
-
 let schemaInput = `
   input topicInput {
     main: topicMainInput
@@ -21,13 +10,13 @@ let schemaInput = `
   }
   input topicMainInput {
     type: String
-    link: String
+    title: String
+    desc: String
     img: [imgItemInput]
   }
   input topicItemInput {
     id: String
   }
-
   input miniHomepageInput {
     id: ID
     swiper: swiperInput
@@ -38,18 +27,19 @@ let schemaInput = `
 `
 let schemaQuery = `
   type topic {
+    id: String
     main: topicMain
     item: [topicItem]
   }
   type topicMain {
     type: String
-    link: String
+    title: String
+    desc: String
     img: [imgItem]
   }
   type topicItem {
     id: String
   }
-
   type miniHomepage {
     id: ID
     swiper: swiper

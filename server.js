@@ -3,8 +3,10 @@ import path from 'path'
 import https from 'https'
 import http from 'http'
 import koa from 'koa'
+import koaParser from 'koa-bodyparser'
+import koaBody from 'koa-body'
 import koaRouter from 'koa-router'
-import koaBody from 'koa-bodyparser'
+
 import { graphqlKoa, graphiqlKoa } from 'apollo-server-koa'
 import cors from 'koa2-cors'
 import jsSHA from 'jssha'
@@ -20,10 +22,8 @@ const storage = multer.memoryStorage()
 const uploadImg = multer({storage: storage})
 const _staticDir = path.resolve('./views')
 
-
-
 //配置graphql 路由
-router.post('/graphql', koaBody(), graphqlKoa({
+router.post('/graphql', koaParser(), graphqlKoa({
   schema: schema,
   formatParams: (params) => {
     // if (params.query.includes('mutation')) {
@@ -36,7 +36,18 @@ router.get('/graphql', graphqlKoa({ schema: schema }));
 router.get('/graphiql', graphiqlKoa({ endpointURL: '/graphql' }));
 
 // 除了graphql以外的请求
-
+router.post('/api/oldHome', koaParser(), async (ctx, next) => {
+  const data = ctx.request.body
+  console.log(data)
+  const result = await api.upload(`home/json/main.json`, Buffer.from(JSON.stringify(data)))
+  if (result.status == 200) {
+    ctx.status = 200
+    ctx.body = {
+      code: 200,
+      message: '成功'
+    }
+  }
+})
 router.get('/api/addPageView', async (ctx, next) => {
   // 70%几率+1，20%几率+2，5%+5 3%+10 2%+100
   console.log('有浏览')
@@ -103,6 +114,7 @@ router.get('/api/brands', async (ctx, next) => {
   console.log('拿到品牌：', brands)
   ctx.body = brands
 })
+
 router.post('/api/uploadImg', uploadImg.single('file'), async (ctx, next) => {
   const fileInfo = await api.upload(`/home/image/${ctx.req.file.originalname}`, ctx.req.file.buffer)
   ctx.body = {
@@ -110,7 +122,7 @@ router.post('/api/uploadImg', uploadImg.single('file'), async (ctx, next) => {
     url: fileInfo.url
   }
 })
-router.post('/api/deleteImg', koaBody(), async (ctx, next) => {
+router.post('/api/deleteImg', koaParser(), async (ctx, next) => {
   const imgName = ctx.request.body.name
   const result = await api.deleteFile(`/home/image/${imgName}`)
   if (result.res.status == 204) {

@@ -284,7 +284,7 @@ let schemaQuery = `
 
 let schema = schemaQuery + schemaInput
 const env = process.NODE_ENV
-const dataName = env === 'production' ? 'main' : 'mainTest'
+const dataName = env === 'production' ? 'main-v2' : 'mainTest'
 console.log(dataName);
 
 // 1.上级对象 2.提交的参数 3.ctx

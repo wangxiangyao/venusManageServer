@@ -52,6 +52,29 @@ let schemaInput = `
     img: [imgItemInput]
   }
 
+  input starPrivilegeInput {
+    item: [starPrivilegeItemInput]
+  }
+  input starPrivilegeItemInput {
+    type: String
+    link: String
+    img: [imgItemInput]
+  }
+
+  input buyerrecommendInput {
+    kind: String
+    item: [buyerrecommendItemInput]
+  }
+  input buyerrecommendItemInput {
+    author: authorInput
+    title: String
+    commodityId: String
+    desc: String
+    type: String
+    link: String
+    img: [imgItemInput]
+  }
+
   input showInput {
     main: showMainInput
     item: [showItemInput]
@@ -69,16 +92,6 @@ let schemaInput = `
     type: String
   }
 
-  input buyerrecommendInput {
-    item: [buyerrecommendItemInput]
-  }
-  input buyerrecommendItemInput {
-    author: authorInput
-    type: String
-    link: String
-    img: [imgItemInput]
-  }
-
   input threeSchemaInput {
     main: threeSchemaMainInput
     item: [threeSchemaItemInput]
@@ -94,7 +107,25 @@ let schemaInput = `
     img: [imgItemInput]
   }
 
+  input brandInput {
+    main: brandMainInput
+    item: [brandItemInput]
+  }
+  input brandMainInput {
+    type: String
+    link: String
+  }
+  input brandItemInput {
+    type: String
+    link: String
+    img: [imgItemInput]
+  }
+
   input guesslikeInput {
+    swiper: [swiperItemInput]
+    handbags: [guesslikeItemInput]
+    travellife: [guesslikeItemInput]
+    fulldress: [guesslikeItemInput]
     item: [guesslikeItemInput]
   }
   input guesslikeItemInput {
@@ -106,11 +137,13 @@ let schemaInput = `
     swiper: swiperInput
     guide: guideInput
     newproduce: newproduceInput
+    starPrivilege: starPrivilegeInput
+    buyerrecommend: [buyerrecommendInput]
     show: showInput
-    buyerrecommend: buyerrecommendInput
     handbags: threeSchemaInput
     travellife: threeSchemaInput
     fulldress: threeSchemaInput
+    brand: brandInput
     guesslike: guesslikeInput
   }
 `
@@ -153,6 +186,15 @@ let schemaQuery = `
     img: [imgItem]
   }
 
+  type starPrivilege {
+    item: [starPrivilegeItem]
+  }
+  type starPrivilegeItem {
+    type: String
+    link: String
+    img: [imgItem]
+  }
+
   type show {
     main: showMain
     item: [showItem]
@@ -171,10 +213,14 @@ let schemaQuery = `
   }
 
   type buyerrecommend {
+    kind: String
     item: [buyerrecommendItem]
   }
   type buyerrecommendItem {
     author: author
+    title: String
+    commodityId: String
+    desc: String
     type: String
     link: String
     img: [imgItem]
@@ -195,7 +241,25 @@ let schemaQuery = `
     img: [imgItem]
   }
 
+  type brand {
+    main: brandMain
+    item: [brandItem]
+  }
+  type brandMain {
+    type: String
+    link: String
+  }
+  type brandItem {
+    type: String
+    link: String
+    img: [imgItem]
+  }
+
   type guesslike {
+    swiper: [swiperItem]
+    handbags: [guesslikeItem]
+    travellife: [guesslikeItem]
+    fulldress: [guesslikeItem]
     item: [guesslikeItem]
   }
   type guesslikeItem {
@@ -207,22 +271,27 @@ let schemaQuery = `
     swiper: swiper
     guide: guide
     newproduce: newproduce
+    starPrivilege: starPrivilege
+    buyerrecommend: [buyerrecommend]
     show: show
-    buyerrecommend: buyerrecommend
     handbags: threeSchema
     travellife: threeSchema
     fulldress: threeSchema
+    brand: brand
     guesslike: guesslike
   }
 `
 
 let schema = schemaQuery + schemaInput
+const env = process.NODE_ENV
+const dataName = env === 'production' ? 'main' : 'mainTest'
+console.log(dataName);
 
 // 1.上级对象 2.提交的参数 3.ctx
 let resolver = {
   Query: {
     async getHomepage (obj, params) {
-      const homepage = await api.getFile('home/json/main.json')
+      const homepage = await api.getFile(`home/json/${dataName}.json`)
       var data = JSON.parse(homepage.content.toString('utf8'))
       return data
     }
@@ -230,19 +299,21 @@ let resolver = {
   Mutation: {
     async setHomepage (obj, { input }) {
       var guesslikeData = input.guesslike
+      const result = await api.upload(`home/json/${dataName}.json`, Buffer.from(JSON.stringify(input)))
+      
       // 商城首页和小程序的猜你喜欢同步
-      const miniHomepageBuffer = await api.getFile('home/json/miniMain.json')
-      var miniHomepageData = JSON.parse(miniHomepageBuffer.content.toString('utf8'))
-      miniHomepageData.guesslike = guesslikeData
-
-      const result = await api.upload('home/json/main.json', Buffer.from(JSON.stringify(input)))
-      const resultUpdataMiniHomepage = await api.upload('home/json/miniMain.json', Buffer.from(JSON.stringify(miniHomepageData)))
-      console.log(result, resultUpdataMiniHomepage)
-      if (result.res.status === 200 && resultUpdataMiniHomepage.res.status === 200) {
+      if (env === 'production') {
+        const miniHomepageBuffer = await api.getFile('home/json/miniMain.json')
+        var miniHomepageData = JSON.parse(miniHomepageBuffer.content.toString('utf8'))
+        miniHomepageData.guesslike = guesslikeData
+        const resultUpdataMiniHomepage = await api.upload('home/json/miniMain.json', Buffer.from(JSON.stringify(miniHomepageData)))
+      }
+      if (result.res.status === 200) {
         return input
       }
     },
     async updateHomepage(obj, {id, input}) {
+      // 弃用
       const updated = await dbModel.Homepage.findOneAndUpdate({
         _id: id,
       }, input0)

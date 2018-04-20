@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import https from 'https'
+import http from 'http'
 import koa from 'koa'
 import koaRouter from 'koa-router'
 import koaBody from 'koa-bodyparser'
@@ -35,6 +36,73 @@ router.get('/graphql', graphqlKoa({ schema: schema }));
 router.get('/graphiql', graphiqlKoa({ endpointURL: '/graphql' }));
 
 // 除了graphql以外的请求
+
+router.get('/api/addPageView', async (ctx, next) => {
+  // 70%几率+1，20%几率+2，5%+5 3%+10 2%+100
+  console.log('有浏览')
+  const articleBuffer = await api.getFile(`home/article/${ctx.request.query.id}.json`)
+  var articleObj = JSON.parse(articleBuffer.content.toString('utf8'))
+  const random = Math.random()
+  var add = 0
+  if (random < 0.7) {
+    add = 0
+  } else if (random < 0.9) {
+    add = 1
+  } else if (random < 0.95) {
+    add = 4
+  } else if (random < 0.98) {
+    add = 9
+  } else {
+    add = 99
+  }
+  if (articleObj.pageView) {
+    articleObj.pageView++
+    articleObj.extra += add
+  } else {
+    articleObj.pageView = 1
+    articleObj.extra = add
+  }
+  console.log(articleObj)
+  const result = await api.upload(`home/article/${articleObj.id}.json`, Buffer.from(JSON.stringify(articleObj)))
+  if (result.res.status === 200) {
+    ctx.body = articleObj
+  } else {
+    ctx.body = {
+      code: 'error',
+      message: '没有做判断'
+    }
+  }
+})
+router.get('/api/brands', async (ctx, next) => {
+  console.log('请求品牌')
+  const brands = await new Promise((resolve, reject) => {
+    http.get('http://app.starluxe.cn/api/commodity/brand', (res) => {
+      const { statusCode } = res;
+      let data = []
+      if (statusCode !== 200) {
+        res.resume()
+        reject()
+      }
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => {
+        data.push(chunk)
+        console.log('每一部分结束')
+      })
+      res.on('end', () => {
+        console.log('end事件')
+        try {
+          const parsedData = JSON.parse(data);
+          console.log('请求数据:', parsedData)
+          resolve(parsedData)
+        } catch (e) {
+          reject(e.message)
+        }
+      })
+    })
+  })
+  console.log('拿到品牌：', brands)
+  ctx.body = brands
+})
 router.post('/api/uploadImg', uploadImg.single('file'), async (ctx, next) => {
   const fileInfo = await api.upload(`/home/image/${ctx.req.file.originalname}`, ctx.req.file.buffer)
   ctx.body = {

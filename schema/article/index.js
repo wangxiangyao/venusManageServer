@@ -4,12 +4,16 @@
 import api from '../../OSSAPI/index.js'
 const articleHomeUrl = 'home/article'
 
+// mainPic是主图，thumbnail是缩略图地址，url表示本文完整链接
+
 let schemaInput = `
   input articleInput {
     id: ID
     title: String
     shareDesc: String
     shareTitle: String
+    mainPic: [imgItemInput]
+    thumbnail: [imgItemInput]
     url: String
     content: String
     author: authorInput
@@ -24,6 +28,8 @@ let schemaQuery = `
     shareDesc: String
     shareTitle: String
     url: String
+    mainPic: [imgItem]
+    thumbnail: [imgItem]
     content: String
     author: author
     updateAt: String
@@ -57,7 +63,7 @@ let resolver = {
   },
   Mutation: {
     async saveArticle (obj, { input }) {
-      const { id, title, url, author, updateAt } = input
+      const { id, title, url, author } = input
       const articleList = await api.getFile('home/json/articleList.json')
       var articleListData = JSON.parse(articleList.content.toString('utf8'))
       // 在文章list中，根据id找到需要更新的项，然后更新
@@ -71,6 +77,7 @@ let resolver = {
           break
         }
       }
+      input.updateAt = +new Date() + ''
 
       const result1 = await api.upload('home/json/articleList.json', Buffer.from(JSON.stringify(articleListData)))
       const result2 = await api.upload(`home/article/${id}.json`, Buffer.from(JSON.stringify(input)))
@@ -90,6 +97,8 @@ let resolver = {
         title: '',
         shareDesc: '',
         shareTitle: '',
+        mainPic: [],
+        thumbnail: [],
         url: '',
         content: '',
         updateAt: time,

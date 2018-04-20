@@ -9,7 +9,7 @@
     "rules": {
         "indent": [
             "error",
-            "tab"
+            "spaces"
         ],
         "linebreak-style": [
             "error",
@@ -17,7 +17,7 @@
         ],
         "quotes": [
             "error",
-            "double"
+            "single"
         ],
         "semi": [
             "error",

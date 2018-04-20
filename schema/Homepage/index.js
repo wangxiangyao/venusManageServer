@@ -302,12 +302,12 @@ let resolver = {
       const result = await api.upload(`home/json/${dataName}.json`, Buffer.from(JSON.stringify(input)))
       
       // 商城首页和小程序的猜你喜欢同步
-      if (env === 'production') {
-        const miniHomepageBuffer = await api.getFile('home/json/miniMain.json')
-        var miniHomepageData = JSON.parse(miniHomepageBuffer.content.toString('utf8'))
-        miniHomepageData.guesslike = guesslikeData
-        const resultUpdataMiniHomepage = await api.upload('home/json/miniMain.json', Buffer.from(JSON.stringify(miniHomepageData)))
-      }
+      // if (env === 'production') {
+      //   const miniHomepageBuffer = await api.getFile('home/json/miniMain.json')
+      //   var miniHomepageData = JSON.parse(miniHomepageBuffer.content.toString('utf8'))
+      //   miniHomepageData.guesslike = guesslikeData
+      //   const resultUpdataMiniHomepage = await api.upload('home/json/miniMain.json', Buffer.from(JSON.stringify(miniHomepageData)))
+      // }
       if (result.res.status === 200) {
         return input
       }

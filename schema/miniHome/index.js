@@ -63,15 +63,16 @@ let resolver = {
   Mutation: {
     async setMiniHomepage (obj, { input }) {
       var guesslikeData = input.guesslike
-      // 商城首页和小程序的猜你喜欢同步
-      const homepageBuffer = await api.getFile('home/json/main.json')
-      var homepageData = JSON.parse(homepageBuffer.content.toString('utf8'))
-      homepageData.guesslike = guesslikeData
-
       const resultUpdataMiniHomepage = await api.upload('home/json/miniMain.json', Buffer.from(JSON.stringify(input)))
-      const resultUpdataHomepage = await api.upload('home/json/main.json', Buffer.from(JSON.stringify(homepageData)))
+
+
+      // 商城首页和小程序的猜你喜欢同步
+      // const homepageBuffer = await api.getFile('home/json/main.json')
+      // var homepageData = JSON.parse(homepageBuffer.content.toString('utf8'))
+      // homepageData.guesslike = guesslikeData
+      // const resultUpdataHomepage = await api.upload('home/json/main.json', Buffer.from(JSON.stringify(homepageData)))
       console.log(resultUpdataMiniHomepage, resultUpdataHomepage)
-      if (resultUpdataMiniHomepage.res.status === 200 && resultUpdataHomepage.res.status === 200) {
+      if (resultUpdataMiniHomepage.res.status === 200) {
         return input
       }
     }

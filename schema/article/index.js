@@ -97,13 +97,23 @@ let resolver = {
         title: '',
         shareDesc: '',
         shareTitle: '',
-        mainPic: [],
-        thumbnail: [],
+        mainPic: [{
+          url: ''
+        }],
+        thumbnail: [{
+          url: ''
+        }],
         url: '',
         content: '',
         updateAt: time,
         createAt: time,
-        author: {} // TODO: 抽象出空数据模型，在需要的地方引入
+        author: {
+          avator: '',
+          desc: '',
+          id: '',
+          name: '',
+          tag: []
+        } // TODO: 抽象出空数据模型，在需要的地方引入
       }
       const articleList = await api.getFile('home/json/articleList.json')
       var articleListData = JSON.parse(articleList.content.toString('utf8'))
@@ -115,6 +125,7 @@ let resolver = {
       // input.id = Number(data[data.length - 1].id) + 1
       // data.push(input)
       // const result = await api.upload('home/json/authorList.json', Buffer.from(JSON.stringify(data)))
+      console.log('新建文章')
       if (result.res.status === 200) {
         articleListData.push({
           id: emptyArticle.id,

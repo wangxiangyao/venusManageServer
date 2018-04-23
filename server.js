@@ -38,9 +38,8 @@ router.get('/graphiql', graphiqlKoa({ endpointURL: '/graphql' }));
 // 除了graphql以外的请求
 router.post('/api/oldHome', koaParser(), async (ctx, next) => {
   const data = ctx.request.body
-  console.log(data)
   const result = await api.upload(`home/json/main.json`, Buffer.from(JSON.stringify(data)))
-  if (result.status == 200) {
+  if (result.res.status == 200) {
     ctx.status = 200
     ctx.body = {
       code: 200,
@@ -103,7 +102,6 @@ router.get('/api/brands', async (ctx, next) => {
         console.log('end事件')
         try {
           const parsedData = JSON.parse(data);
-          console.log('请求数据:', parsedData)
           resolve(parsedData)
         } catch (e) {
           reject(e.message)

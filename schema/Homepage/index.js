@@ -283,7 +283,8 @@ let schemaQuery = `
 `
 
 let schema = schemaQuery + schemaInput
-const env = process.NODE_ENV
+const env = process.env.NODE_ENV
+console.log(env)
 const dataName = env === 'production' ? 'main-v2' : 'mainTest'
 console.log(dataName);
 

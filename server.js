@@ -87,15 +87,16 @@ router.get('/api/brands', async (ctx, next) => {
   console.log('请求品牌')
   const brands = await new Promise((resolve, reject) => {
     http.get('http://app.starluxe.cn/api/commodity/brand', (res) => {
+      console.log('已经发送请求')
       const { statusCode } = res;
-      let data = []
+      let data = ''
       if (statusCode !== 200) {
         res.resume()
         reject()
       }
       res.setEncoding('utf8');
       res.on('data', (chunk) => {
-        data.push(chunk)
+        data += chunk
         console.log('每一部分结束')
       })
       res.on('end', () => {

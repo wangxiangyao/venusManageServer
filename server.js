@@ -135,6 +135,10 @@ router.get('/', async (ctx, next) => {
   var indexPath = path.join(_staticDir, '/index.html');
   ctx.response.body = fs.readFileSync(indexPath, 'utf-8');
 })
+router.get('/.well-known/pki-validation/fileauth.txt', async (ctx, next) => {
+  var indexPath = path.join(__dirname, './.well-known/pki-validation/fileauth.txt');
+  ctx.response.body = fs.readFileSync(indexPath, 'utf-8');
+})
 
 router.get('/wxConfig', async (ctx, next) => {
   // 一个参数：url

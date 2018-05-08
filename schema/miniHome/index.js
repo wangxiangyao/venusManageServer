@@ -71,7 +71,7 @@ let resolver = {
       // var homepageData = JSON.parse(homepageBuffer.content.toString('utf8'))
       // homepageData.guesslike = guesslikeData
       // const resultUpdataHomepage = await api.upload('home/json/main.json', Buffer.from(JSON.stringify(homepageData)))
-      console.log(resultUpdataMiniHomepage, resultUpdataHomepage)
+      console.log(resultUpdataMiniHomepage)
       if (resultUpdataMiniHomepage.res.status === 200) {
         return input
       }

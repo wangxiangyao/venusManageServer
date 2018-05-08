@@ -48,22 +48,32 @@ router.post('/api/oldHome', koaParser(), async (ctx, next) => {
   }
 })
 router.get('/api/addPageView', async (ctx, next) => {
-  // 70%几率+1，20%几率+2，5%+5 3%+10 2%+100
+  // 超过2000：70%几率+1，20%几率+2，5%+5 3%+10 2%+100
+  // 少于2000：50% 100随机加 50%加1000
   console.log('有浏览')
   const articleBuffer = await api.getFile(`home/article/${ctx.request.query.id}.json`)
   var articleObj = JSON.parse(articleBuffer.content.toString('utf8'))
   const random = Math.random()
   var add = 0
-  if (random < 0.7) {
-    add = 0
-  } else if (random < 0.9) {
-    add = 1
-  } else if (random < 0.95) {
-    add = 4
-  } else if (random < 0.98) {
-    add = 9
+  var count = articleObj.pageView ? articleObj.pageView + articleObj.extra : 0
+  if (count < 2000) {
+    if (random < 0.5) {
+      add = 100 * Math.random() - 1
+    } else {
+      add = 999
+    }
   } else {
-    add = 99
+    if (random < 0.7) {
+      add = 0
+    } else if (random < 0.9) {
+      add = 1
+    } else if (random < 0.95) {
+      add = 4
+    } else if (random < 0.98) {
+      add = 9
+    } else {
+      add = 99
+    }
   }
   if (articleObj.pageView) {
     articleObj.pageView++
